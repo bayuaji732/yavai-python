@@ -117,7 +117,7 @@ S3_ENDPOINT=http://your-s3-endpoint:9878
 # MLflow S3 Backend (MinIO)
 AWS_ACCESS_KEY_ID=your_minio_access_key
 AWS_SECRET_ACCESS_KEY=your_minio_secret_key
-MLFLOW_S3_ENDPOINT_URL=http://your-minio-endpoint:9002
+MLFLOW_S3_ENDPOINT_URL=http://your-minio-endpoint:9000
 ```
 
 ## Quick Start
