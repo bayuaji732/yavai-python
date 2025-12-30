@@ -1,0 +1,438 @@
+Metadata-Version: 2.4
+Name: yavai
+Version: 0.1.0
+Summary: End-to-End AI Platform - Data Management and MLOps Library
+Author-email: Ahmad Lutfi Bayu Aji <bayuaji732@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/bayuaji732/yavai-python
+Project-URL: Repository, https://github.com/bayuaji732/yavai-python
+Project-URL: Issues, https://github.com/bayuaji732/yavai-python/issues
+Project-URL: Documentation, https://github.com/bayuaji732/yavai-python#readme
+Keywords: data-management,mlops,machine-learning,experiment-tracking,mlflow,s3,jdbc
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: boto3>=1.26.0
+Requires-Dist: python-dotenv>=0.19.0
+Requires-Dist: furl>=2.1.3
+Requires-Dist: mlflow>=2.0.0
+Requires-Dist: plotly>=5.0.0
+Requires-Dist: pandas>=1.3.0
+Requires-Dist: numpy>=1.20.0
+Requires-Dist: requests>=2.25.0
+Requires-Dist: openpyxl>=3.0.0
+Requires-Dist: xlrd>=2.0.0
+Requires-Dist: librosa>=0.9.0
+Requires-Dist: pydub>=0.25.0
+Requires-Dist: opencv-python-headless>=4.5.0
+Requires-Dist: pillow-heif>=0.10.0
+Requires-Dist: Pillow>=9.0.0
+Requires-Dist: pyhive[hive-pure-sasl]>=0.6.5
+Requires-Dist: jaydebeapi>=1.2.3
+Requires-Dist: psycopg2-binary>=2.9.0
+Requires-Dist: paramiko>=2.10.0
+Requires-Dist: pyreadstat>=1.1.5
+Requires-Dist: ipython>=7.0.0
+Requires-Dist: pytest>=7.0.0
+Requires-Dist: black>=22.0.0
+Requires-Dist: flake8>=4.0.0
+Requires-Dist: mypy>=0.950
+
+# YAVAI Python Library
+
+**YAVAI** is an end-to-end AI platform library providing unified access to data management, MLOps tracking, and computational resources for machine learning workflows.
+
+## Features
+
+### Data Management
+
+- **Dataset Operations**: Browse, download, and manage datasets via YAVAI API
+- **File Readers**: Support for CSV, Excel, SPSS (.sav), JSON with S3 integration
+- **Media Processing**: Image (HEIF/JPEG/PNG), audio (WAV/MP3), and video file handling
+- **JDBC Connectivity**: Auto-downloading JDBC drivers for Hive, PostgreSQL, MySQL
+- **SFTP Client**: Secure file transfer operations
+
+### MLOps & Tracking
+
+- **MLflow Integration**: Experiment tracking, metrics, parameters, and artifacts
+- **S3 Artifact Storage**: Seamless integration with S3/MinIO backends
+- **Model Logging**: Support for scikit-learn, PyTorch, and generic Python models
+- **Auto-configuration**: Automatic credential management for tracking servers
+
+### Utilities
+
+- **Package Manager**: Runtime package installation and management
+- **Configuration Management**: Environment-based configuration with `.env` support
+
+## Installation
+
+### From Source
+
+```bash
+git clone https://github.com/bayuaji732/yavai-python.git
+cd yavai-python
+pip install -e .
+```
+
+### Via pip (if published)
+
+```bash
+pip install yavai
+```
+
+### Dependencies
+
+Core dependencies are automatically installed. For specific features:
+
+```bash
+# Audio processing
+pip install librosa pydub
+
+# Computer vision
+pip install opencv-python-headless pillow-heif
+
+# JDBC connectivity
+pip install jaydebeapi
+
+# SFTP operations
+pip install paramiko
+```
+
+## Configuration
+
+Create a `.env` file in your project root or set environment variables:
+
+```bash
+# YAVAI API Authentication
+TOKEN=your_jwt_token_here
+
+# API Endpoints
+API_BASE_URL=https://your-yavai-instance:2222
+API_BASE_URL2=http://your-yavai-instance:1340
+API_URL=http://your-yavai-instance:1340/notebook-experiment/
+API_URL2=http://your-yavai-instance:1340/mlflow-uri?username=
+
+# S3/Ozone Storage
+S3_ACCESS_KEY=your_access_key
+S3_SECRET_KEY=your_secret_key
+S3_ENDPOINT=http://your-s3-endpoint:9878
+
+# MLflow S3 Backend (MinIO)
+AWS_ACCESS_KEY_ID=your_minio_access_key
+AWS_SECRET_ACCESS_KEY=your_minio_secret_key
+MLFLOW_S3_ENDPOINT_URL=http://your-minio-endpoint:9002
+```
+
+## Quick Start
+
+### Dataset Management
+
+```python
+import yavai
+
+# Browse dataset contents
+dataset = yavai.browse_dataset("dataset_id_123")
+print(dataset)
+
+# Read CSV file from S3
+df = yavai.read_csv("file_id_456")
+
+# Read Excel file
+df_excel = yavai.read_excel("file_id_789")
+
+# Open and display image
+img = yavai.open_image("image_file_id", width=800)
+img.show()
+
+# Read audio for training
+audio_array, sample_rate = yavai.read_audio("audio_file_id")
+```
+
+### MLflow Experiment Tracking
+
+```python
+import yavai
+
+# Configure tracking server
+yavai.set_tracking_uri("yavai")  # Auto-detect from API
+# or
+yavai.set_tracking_uri("http://mlflow-server:5000")
+
+# Create/select experiment
+yavai.set_experiment("my-experiment")
+
+# Start training run
+with yavai.start_run(run_name="training-001"):
+    # Log parameters
+    yavai.log_params({
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "epochs": 100
+    })
+
+    # Training loop
+    for epoch in range(100):
+        loss = train_step()  # Your training code
+        yavai.log_metric("loss", loss, step=epoch)
+
+    # Log trained model
+    yavai.log_model(model, "model")
+
+    # Log artifacts
+    yavai.log_figure(plot_figure, "training_plot.png")
+    yavai.log_dict({"config": "value"}, "config.json")
+```
+
+### JDBC Database Access
+
+```python
+import yavai
+
+# Connect to Hive (auto-downloads JDBC driver)
+yavai.jdbc.connect(
+    url="jdbc:hive2://localhost:10000/default",
+    user="hive",
+    password="hive"
+)
+
+# Execute query and get DataFrame
+df = yavai.jdbc.execute("SELECT * FROM my_table LIMIT 100")
+print(df.head())
+
+# Close connection
+yavai.jdbc.close()
+
+# Preview JDBC table via API
+preview = yavai.get_table_preview("dataset_id", "table_name")
+```
+
+### SFTP File Transfer
+
+```python
+import yavai
+
+# Connect to SFTP server
+yavai.sftp.connect(
+    hostname="sftp.example.com",
+    username="user",
+    password="pass",
+    port=22
+)
+
+# List remote files
+files = yavai.sftp.list_files("/remote/path")
+
+# Download file
+yavai.sftp.download("/remote/file.csv", "local_file.csv")
+
+# Upload file
+yavai.sftp.upload("local_data.csv", "/remote/data.csv")
+
+# Close connection
+yavai.sftp.close()
+```
+
+### Media Processing
+
+```python
+import yavai
+
+# Image processing
+img = yavai.open_image("image_id", width=640, height=480)
+img.save("output.jpg")
+
+# Audio for training (returns numpy array)
+audio_data, sr = yavai.read_audio("audio_id")
+# Use audio_data for model training
+
+# Audio for playback (returns IPython.display.Audio)
+audio_player = yavai.open_audio("audio_id")
+
+# Video frame extraction for training
+frames = yavai.read_video("video_id")  # List of numpy arrays
+# frames can be converted to np.array for batch processing
+
+# Video playback in notebook
+yavai.open_video("video_id", width=800)
+```
+
+### Runtime Package Management
+
+```python
+import yavai
+
+# Install package at runtime
+yavai.pkg.install("scikit-learn")
+
+# Show package info
+yavai.pkg.show("pandas")
+
+# List installed packages
+yavai.pkg.list()
+```
+
+## API Reference
+
+### Dataset Operations
+
+- `browse_dataset(dataset_id)` - Retrieve dataset metadata and contents
+- `browse_file(file_id)` - Retrieve file metadata
+- `browse_modelzoo(modelzoo_id)` - Browse model zoo contents
+- `get_table_preview(dataset_id, table_name)` - Preview JDBC table data
+
+### File Readers
+
+- `read_csv(file_id, **kwargs)` - Read CSV from S3
+- `read_excel(file_id, **kwargs)` - Read Excel file
+- `read_sav(file_id, **kwargs)` - Read SPSS file
+- `read_json(file_id, **kwargs)` - Read JSON file
+- `read_file(file_id, mode='rb')` - Read raw file data
+
+### Media Operations
+
+- `open_image(file_id, width=None, height=None)` - Open and resize image
+- `read_audio(file_id)` - Load audio as numpy array for training
+- `open_audio(file_id)` - Open audio for playback
+- `read_video(file_id)` - Extract video frames as numpy arrays
+- `open_video(file_id, width=None, height=None)` - Display video in notebook
+
+### MLflow Tracking
+
+- `set_tracking_uri(uri)` - Configure tracking server
+- `set_experiment(name)` - Set active experiment
+- `start_run(run_name=None)` - Start new run
+- `end_run(status="FINISHED")` - End current run
+- `log_param(key, value)` / `log_params(dict)` - Log parameters
+- `log_metric(key, value, step=None)` / `log_metrics(dict, step=None)` - Log metrics
+- `log_artifact(path)` / `log_artifacts(dir)` - Log artifact files
+- `log_model(model, artifact_path)` - Log trained model
+- `log_figure(figure, filename)` - Log matplotlib/plotly figure
+- `log_image(image, filename)` - Log image artifact
+- `log_dict(dict, filename)` - Log dictionary as JSON
+- `log_text(text, filename)` - Log text content
+
+### JDBC Operations
+
+- `yavai.jdbc.connect(url, user, password, kerberos=False)` - Connect to database
+- `yavai.jdbc.execute(query)` - Execute SQL and return DataFrame
+- `yavai.jdbc.close()` - Close connection
+- `yavai.jdbc.add_custom_driver(...)` - Register custom JDBC driver
+
+### SFTP Operations
+
+- `yavai.sftp.connect(hostname, username, password, port=22)` - Connect to SFTP
+- `yavai.sftp.list_files(remote_path)` - List remote directory
+- `yavai.sftp.download(remote_path, local_path)` - Download file
+- `yavai.sftp.upload(local_path, remote_path)` - Upload file
+- `yavai.sftp.close()` - Close connection
+
+## Architecture
+
+```
+yavai/
+├── connections/          # External connectivity
+│   ├── jdbc.py          # JDBC with auto-driver download
+│   └── sftp.py          # SFTP client
+├── datasets/            # Dataset API client
+│   ├── api.py          # Dataset operations
+│   └── client.py       # HTTP client wrapper
+├── io/                  # I/O operations
+│   ├── readers.py      # File format readers
+│   ├── media.py        # Media file handlers
+│   └── utils.py        # S3 utilities
+├── tracking/           # MLOps tracking
+│   └── mlflow_wrapper.py  # MLflow integration
+├── utils/              # Utilities
+│   └── package_manager.py  # Runtime package management
+├── config.py           # Configuration management
+└── __init__.py         # Public API
+```
+
+## Development
+
+### Setup Development Environment
+
+```bash
+# Clone repository
+git clone https://github.com/bayuaji732/yavai-python.git
+cd yavai-python
+
+# Install in editable mode with dev dependencies
+pip install -e .
+pip install ipython pytest black flake8
+```
+
+### Running Tests
+
+```bash
+# Run test suite (if available)
+pytest tests/
+
+# Type checking
+mypy yavai/
+
+# Code formatting
+black yavai/
+flake8 yavai/
+```
+
+### Project Structure Conventions
+
+- All S3 paths use `s3a://` protocol
+- JDBC drivers are auto-downloaded to `~/.yavai/jars/`
+- MLflow artifacts stored in configured S3/MinIO backend
+- Environment variables loaded from `.env` via `python-dotenv`
+
+## Requirements
+
+- Python >= 3.8
+- See `pyproject.toml` for complete dependency list
+
+### Optional Dependencies
+
+- **Audio**: `librosa`, `pydub`
+- **Video**: `opencv-python-headless`
+- **JDBC**: `jaydebeapi`
+- **SFTP**: `paramiko`
+- **SPSS**: `pyreadstat`
+
+## License
+
+MIT License - See LICENSE file for details
+
+## Contributing
+
+Contributions are welcome! Please submit pull requests or issues on GitHub.
+
+## Authors
+
+- Ahmad Lutfi Bayu Aji - [bayuaji732@gmail.com](mailto:bayuaji732@gmail.com)
+
+## Links
+
+- **Repository**: https://github.com/bayuaji732/yavai-python
+- **Issues**: https://github.com/bayuaji732/yavai-python/issues
+
+## Changelog
+
+### Version 0.1.0 (Alpha)
+
+- Initial release
+- Dataset management API
+- MLflow experiment tracking
+- JDBC connectivity with auto-driver download
+- SFTP file transfer
+- Media file handling (image/audio/video)
+- File format readers (CSV/Excel/SPSS/JSON)
+- S3/Ozone storage integration
