@@ -31,7 +31,8 @@ class YAVAIClient:
         headers: Optional[Dict] = None,
         data: Optional[Dict] = None,
         is_download: bool = False,
-        use_alt_base_url: bool = False
+        use_alt_base_url: bool = False,
+        return_raw: bool = False  # Add this parameter
     ) -> Dict:
         """
         Make an HTTP request to YAVAI API.
@@ -57,6 +58,9 @@ class YAVAIClient:
         
         if is_download:
             return self._handle_download(response)
+
+        if return_raw:  # Add this handling
+            return response.text
         
         return response.json()
 

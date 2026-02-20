@@ -14,8 +14,7 @@ class DatasetAPI:
     V1_LIB = ["dataset-management", "api", "v1", "lib"]
     V1 = ["dataset-management", "api", "v1"]
     V2 = ["dataset-management", "api", "v2"]
-    V3 = ["api", "v1", "feature-groups"]
-    V4 = ["api", "v1", "training-datasets"]
+    V1_API = ["api", "v1"]
     
     def __init__(self):
         self._client = YAVAIClient()
@@ -145,14 +144,14 @@ class DatasetAPI:
         return pd.DataFrame(response.get("data"))
 
     # Feature Groups
-    def create_feature_group(self, app_name: str, app_token: str, feature_group: Dict) -> Dict:
+    def create_feature_group(self, app_name: str, app_token: str, feature_group: str) -> Dict:
         """
         Create a new feature group.
         
         Args:
             app_name: Application name
             app_token: Application token
-            feature_group: Feature group configuration
+            feature_group: Feature group configuration as JSON string
             
         Returns:
             Created feature group data
@@ -165,18 +164,18 @@ class DatasetAPI:
         response = self._client.request(
             "POST",
             ["feature-groups"],
-            base_paths=self.V3,
+            base_paths=self.V1_API,
             data=data
         )
-        return response.get("data")
+        return response
 
-    def read_feature_group(self, app_name: str, feature_group: Dict) -> pd.DataFrame:
+    def preview_feature_group(self, app_name: str, feature_group: str) -> pd.DataFrame:
         """
-        Read feature group data.
+        Preview feature group data.
         
         Args:
             app_name: Application name
-            feature_group: Feature group configuration
+            feature_group: Feature group configuration as JSON string
             
         Returns:
             DataFrame containing feature group preview
@@ -188,19 +187,20 @@ class DatasetAPI:
         response = self._client.request(
             "POST",
             ["feature-groups", "preview"],
-            base_paths=self.V3,
-            data=data
+            base_paths=self.V1_API,
+            data=data,
+            return_raw=True
         )
-        return pd.DataFrame(response.get("data"))
+        return pd.read_csv(StringIO(response))
 
-    def delete_feature_group(self, app_name: str, app_token: str, feature_group: Dict) -> Dict:
+    def delete_feature_group(self, app_name: str, app_token: str, feature_group: str) -> Dict:
         """
         Delete a feature group.
         
         Args:
             app_name: Application name
             app_token: Application token
-            feature_group: Feature group configuration
+            feature_group: Feature group configuration as JSON string
             
         Returns:
             Deletion status
@@ -213,22 +213,22 @@ class DatasetAPI:
         response = self._client.request(
             "POST",
             ["feature-groups", "delete"],
-            base_paths=self.V3,
+            base_paths=self.V1_API,
             data=data
         )
-        return response.get("data")
+        return response
 
     # Training Datasets
     def create_training_dataset(self, app_name: str, app_token: str, 
-                               training_dataset: Dict, data: Dict) -> Dict:
+                               training_dataset: str, data: str) -> Dict:
         """
         Create a new training dataset.
         
         Args:
             app_name: Application name
             app_token: Application token
-            training_dataset: Training dataset configuration
-            data: Training dataset DTO object
+            training_dataset: Training dataset configuration as JSON string
+            data: Training dataset DTO object as JSON string
             
         Returns:
             Created training dataset data
@@ -242,18 +242,18 @@ class DatasetAPI:
         response = self._client.request(
             "POST",
             ["training-datasets"],
-            base_paths=self.V4,
+            base_paths=self.V1_API,
             data=request_data
         )
-        return response.get("data")
+        return response
 
-    def read_training_dataset(self, app_name: str, training_dataset: Dict) -> pd.DataFrame:
+    def preview_training_dataset(self, app_name: str, training_dataset: str) -> pd.DataFrame:
         """
-        Read training dataset data.
+        Preview training dataset data.
         
         Args:
             app_name: Application name
-            training_dataset: Training dataset configuration
+            training_dataset: Training dataset configuration as JSON string
             
         Returns:
             DataFrame containing training dataset preview
@@ -265,20 +265,21 @@ class DatasetAPI:
         response = self._client.request(
             "POST",
             ["training-datasets", "preview"],
-            base_paths=self.V4,
-            data=data
+            base_paths=self.V1_API,
+            data=data,
+            return_raw=True
         )
-        return pd.DataFrame(response.get("data"))
+        return pd.read_csv(StringIO(response))
 
     def delete_training_dataset(self, app_name: str, app_token: str, 
-                                training_dataset: Dict) -> Dict:
+                                training_dataset: str) -> Dict:
         """
         Delete a training dataset.
         
         Args:
             app_name: Application name
             app_token: Application token
-            training_dataset: Training dataset configuration
+            training_dataset: Training dataset configuration as JSON string
             
         Returns:
             Deletion status
@@ -291,7 +292,7 @@ class DatasetAPI:
         response = self._client.request(
             "POST",
             ["training-datasets", "delete"],
-            base_paths=self.V4,
+            base_paths=self.V1_API,
             data=data
         )
-        return response.get("data")
+        return response
